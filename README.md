@@ -11,8 +11,9 @@
 - `Dockerfile` – builds a ready-to-serve container that trains during the image build.
 - `.github/workflows/ci.yml` – CI workflow (tests, Docker build, GitHub Models summary).
 
-The datasets and regression setup follow the Microsoft Learn module on regression fundamentals, and the hold-out examples come from the same guide:
-- Tutorial: https://learn.microsoft.com/en-us/training/modules/fundamentals-machine-learning/4-regression?pivots=text
+The dataset and regression setup are adapted from the Microsoft Learn AI fundamentals exercise:
+- Exercise: https://microsoftlearning.github.io/mslearn-ai-fundamentals/Instructions/Exercises/01-machine-learning.html
+- Background reading: https://learn.microsoft.com/en-us/training/modules/fundamentals-machine-learning/4-regression?pivots=text
 
 ## Quickstart
 1. Create and activate a virtual environment, then install dependencies:
@@ -65,6 +66,12 @@ The datasets and regression setup follow the Microsoft Learn module on regressio
      "test_rmse": 5.144147563133475
    }
    ```
+   Response fields:
+   - `predicted_sales` – point estimate for daily sales given the supplied context (≈187 cones).
+   - `temperature`, `rainfall`, `day_of_week`, `month` – echo the inputs so you can confirm which observation was scored.
+   - `model_version` – trained model artifact that produced the prediction (`icecream_regressor.joblib`).
+   - `train_r2`/`train_rmse` – goodness-of-fit on the 70% training slice (higher R², lower RMSE are better).
+   - `test_r2`/`test_rmse` – same metrics on the unseen 30% hold-out slice, showing generalization.
 
 ## Docker Workflow
 - Build the image (training runs during the build step):
