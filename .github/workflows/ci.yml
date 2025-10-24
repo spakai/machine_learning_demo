@@ -43,23 +43,32 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_MODELS_TOKEN: ${{ secrets.GITHUB_MODELS_TOKEN }}
-    if: ${{ env.GITHUB_MODELS_TOKEN != '' }}
     steps:
+      - name: Skip when token missing
+        if: ${{ env.GITHUB_MODELS_TOKEN == '' }}
+        run: |
+          echo "GITHUB_MODELS_TOKEN secret not set; skipping summary job."
+
       - name: Checkout repository
+        if: ${{ env.GITHUB_MODELS_TOKEN != '' }}
         uses: actions/checkout@v4
 
       - name: Set up Python
+        if: ${{ env.GITHUB_MODELS_TOKEN != '' }}
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
       - name: Install dependencies
+        if: ${{ env.GITHUB_MODELS_TOKEN != '' }}
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Retrain model for summary
+        if: ${{ env.GITHUB_MODELS_TOKEN != '' }}
         run: python -m src.train
 
       - name: Generate GitHub Models summary
+        if: ${{ env.GITHUB_MODELS_TOKEN != '' }}
         run: python scripts/github_models_report.py
