@@ -43,7 +43,12 @@ def main(argv: list[str] | None = None) -> None:
     x, y = load_dataset(args.data_path)
     artifacts = train_regressor(x, y)
     save_model(artifacts.model, args.model_path)
-    metrics = {"r2": artifacts.r2, "rmse": artifacts.rmse}
+    metrics = {
+        "train_r2": artifacts.train_r2,
+        "train_rmse": artifacts.train_rmse,
+        "test_r2": artifacts.test_r2,
+        "test_rmse": artifacts.test_rmse,
+    }
     write_metrics(metrics, args.metrics_path)
     print(f"Model trained and saved to {args.model_path}")
     print(json.dumps(metrics, indent=2))

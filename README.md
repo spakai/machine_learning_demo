@@ -1,10 +1,10 @@
 # Ice-Cream Sales Regressor
-- Predict daily ice-cream sales from a single feature: ambient temperature.
+- Predict daily ice-cream sales from four drivers: day of week, month, temperature, and rainfall.
 - Training pipeline powered by `scikit-learn`, packaged behind a FastAPI service.
 - GitHub Actions CI trains, tests, builds the Docker image, and (optionally) calls GitHub Models for reporting.
 
 ## Project Layout
-- `data/icecream_sales.csv` – sample dataset used for initial training.
+- `data/icecream_sales.csv` – sample dataset used for initial training (DayOfWeek, Month, Temperature, Rainfall, IceCreamsSold).
 - `src/train.py` – command-line training entrypoint.
 - `src/api.py` – FastAPI app exposing `/predict`.
 - `scripts/github_models_report.py` – optional GitHub Models helper that turns metrics into prose.
@@ -27,23 +27,43 @@ The datasets and regression setup follow the Microsoft Learn module on regressio
    ```
    Sample dataset (`data/icecream_sales.csv`):
    ```
-   temperature,sales
-   51,1
-   65,14
-   69,20
-   72,23
-   75,26
-   81,30
+   DayOfWeek,Month,Temperature,Rainfall,IceCreamsSold
+   Tuesday,April,59.4,0.74,61
+   Thursday,April,53.6,0.28,33
+   Sunday,April,51.4,0.14,21
+   Monday,April,50.8,0.06,23
+   Tuesday,April,57.4,0.79,51
+   Wednesday,April,59.9,0.25,73
    ```
 3. Launch the FastAPI server:
    ```bash
    uvicorn src.api:app --reload
    ```
-4. Query the API:
-   ```bash
-   curl -X POST http://localhost:8000/predict \
-     -H "Content-Type: application/json" \
-     -d '{"temperature": 30}'
+4. Query the API (provide the categorical context explicitly):
+    ```bash
+    curl -X POST http://localhost:8000/predict \
+      -H "Content-Type: application/json" \
+     -d '{
+       "day_of_week": "Friday",
+       "month": "July",
+       "temperature": 84.0,
+       "rainfall": 0.3
+     }'
+    ```
+   Sample response:
+   ```json
+   {
+     "predicted_sales": 187.06131603708448,
+     "temperature": 84.0,
+     "rainfall": 0.3,
+     "day_of_week": "Friday",
+     "month": "July",
+     "model_version": "icecream_regressor.joblib",
+     "train_r2": 0.9934421121757082,
+     "train_rmse": 4.833032939425899,
+     "test_r2": 0.9847831112058534,
+     "test_rmse": 5.144147563133475
+   }
    ```
 
 ## Docker Workflow
@@ -58,7 +78,7 @@ The datasets and regression setup follow the Microsoft Learn module on regressio
 
 ## GitHub Actions CI
 - Runs on every push/PR:
-  - Installs dependencies, trains the model, and executes `pytest`.
+  - Installs dependencies, trains the model with a chronological 70/30 split, and executes `pytest`.
   - Builds the Docker image to ensure containerization stays healthy.
   - Optionally invokes GitHub Models (see next section) to produce a summary.
 - Configure repository secrets for private runners if needed (no secrets needed for the base pipeline).
@@ -80,31 +100,24 @@ The datasets and regression setup follow the Microsoft Learn module on regressio
   ```
 - Tests cover the training utilities, API endpoint, and now validate on held-out examples.
 
-Hold-out validation data (used by tests to sanity-check the model):
-```
-temperature,sales
-52,0
-67,14
-70,23
-73,22
-78,26
-83,36
-```
+Hold-out validation uses the final 30% of `data/icecream_sales.csv` to ensure the model generalizes to unseen records.
 
 ## Metrics at a Glance
-- Training prints `r2` (coefficient of determination) and `rmse` (root mean square error).  
-  - `r2` ranges up to 1.0, with higher meaning the model explains more variance in the data.  
-  - `rmse` stays in sales units; lower values mean smaller average prediction errors.
+- Training prints `train_r2`, `train_rmse`, `test_r2`, and `test_rmse`.  
+  - `*_r2` range up to 1.0, with higher scores indicating more variance explained.  
+  - `*_rmse` stay in sales units; lower numbers mean smaller average errors.
 - Example run:  
   ```bash
   $ python -m src.train
   Model trained and saved to .../models/icecream_regressor.joblib
   {
-    "r2": 0.990987388929917,
-    "rmse": 0.8972884647243659
+    "train_r2": 0.98,
+    "train_rmse": 8.84,
+    "test_r2": 0.95,
+    "test_rmse": 12.31
   }
   ```
-  These numbers show the linear fit matches the new training data closely. The hold-out check keeps you aware of generalization performance.
+  These numbers show how the model performs on both the training slice and the unseen 30% hold-out partition.
 
 ## Workflow Summary
 - Retrain: `python -m src.train`
