@@ -11,6 +11,9 @@
 - `Dockerfile` – builds a ready-to-serve container that trains during the image build.
 - `.github/workflows/ci.yml` – CI workflow (tests, Docker build, GitHub Models summary).
 
+The datasets and regression setup follow the Microsoft Learn module on regression fundamentals, and the hold-out examples come from the same guide:
+- Tutorial: https://learn.microsoft.com/en-us/training/modules/fundamentals-machine-learning/4-regression?pivots=text
+
 ## Quickstart
 1. Create and activate a virtual environment, then install dependencies:
    ```bash
