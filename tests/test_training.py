@@ -23,12 +23,12 @@ def test_training_pipeline_creates_persisted_model(tmp_path: Path) -> None:
     assert actual == pytest.approx(expected, rel=1e-6)
 
 
-@pytest.mark.anyio
+@pytest.mark.anyio("asyncio")
 async def test_fastapi_endpoint_returns_prediction() -> None:
     # Ensure the default model is present for the API to load.
     train.main([])
 
-    transport = httpx.ASGITransport(app=app)
+    transport = httpx.ASGITransport(app=app, lifespan="on")
     async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
         response = await client.post("/predict", json={"temperature": 30.0})
 
