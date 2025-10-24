@@ -3,6 +3,9 @@
 - Training pipeline powered by `scikit-learn`, packaged behind a FastAPI service.
 - GitHub Actions CI trains, tests, builds the Docker image, and (optionally) calls GitHub Models for reporting.
 
+## About
+This project showcases a multivariate linear regression that forecasts daily ice-cream sales using both calendar cues (day of week, month) and weather measurements (temperature, rainfall). The expanded feature set replaces the earlier single-input (temperature-only) example from the Microsoft Learn exercise and yields a richer, more realistic sales predictor.
+
 ## Project Layout
 - `data/icecream_sales.csv` – sample dataset used for initial training (DayOfWeek, Month, Temperature, Rainfall, IceCreamsSold).
 - `src/train.py` – command-line training entrypoint.
