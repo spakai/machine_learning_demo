@@ -1,0 +1,18 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
+.venv/
+env/
+venv/
+
+# Testing
+.pytest_cache/
+
+# Model outputs
+models/
+
+# IDE
+.idea/
+.vscode/
