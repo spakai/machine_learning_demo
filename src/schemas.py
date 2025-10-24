@@ -5,7 +5,7 @@ class PredictionRequest(BaseModel):
     temperature: float = Field(
         ...,
         ge=-50,
-        le=60,
+        le=90,
         description="Ambient temperature in Celsius.",
     )
 
