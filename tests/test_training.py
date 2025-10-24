@@ -5,9 +5,14 @@ import numpy as np
 import pytest
 
 from src import train
-from src.api import app
+from src.api import app, load_artifacts
 from src.model_utils import load_dataset, load_model, save_model, train_regressor
 from src.settings import DATA_PATH, MODEL_PATH
+
+
+@pytest.fixture
+def anyio_backend() -> str:
+    return "asyncio"
 
 
 def test_training_pipeline_creates_persisted_model(tmp_path: Path) -> None:
@@ -23,12 +28,13 @@ def test_training_pipeline_creates_persisted_model(tmp_path: Path) -> None:
     assert actual == pytest.approx(expected, rel=1e-6)
 
 
-@pytest.mark.anyio("asyncio")
+@pytest.mark.anyio
 async def test_fastapi_endpoint_returns_prediction() -> None:
     # Ensure the default model is present for the API to load.
     train.main([])
+    load_artifacts()
 
-    transport = httpx.ASGITransport(app=app, lifespan="on")
+    transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
         response = await client.post("/predict", json={"temperature": 30.0})
 
