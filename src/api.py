@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
@@ -15,12 +16,6 @@ from .settings import MODEL_DIR, MODEL_PATH
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(
-    title="Ice-Cream Sales Regressor",
-    version="0.1.0",
-    description="Predict ice-cream sales from ambient temperature.",
-)
-
 model: Optional[LinearRegression] = None
 metrics: dict = {}
 
@@ -32,7 +27,6 @@ def read_metrics(metrics_path: Path) -> dict:
     return json.loads(raw)
 
 
-@app.on_event("startup")
 def load_artifacts() -> None:
     global model, metrics
     try:
@@ -41,6 +35,20 @@ def load_artifacts() -> None:
         logger.warning("Model file not found at %s. Run the training pipeline first.", MODEL_PATH)
         model = None
     metrics = read_metrics(MODEL_DIR / "metrics.json")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    load_artifacts()
+    yield
+
+
+app = FastAPI(
+    title="Ice-Cream Sales Regressor",
+    version="0.1.0",
+    description="Predict ice-cream sales from ambient temperature.",
+    lifespan=lifespan,
+)
 
 
 @app.get("/health")

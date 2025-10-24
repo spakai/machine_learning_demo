@@ -1,8 +1,8 @@
 from pathlib import Path
 
+import httpx
 import numpy as np
 import pytest
-from fastapi.testclient import TestClient
 
 from src import train
 from src.api import app
@@ -23,11 +23,15 @@ def test_training_pipeline_creates_persisted_model(tmp_path: Path) -> None:
     assert actual == pytest.approx(expected, rel=1e-6)
 
 
-def test_fastapi_endpoint_returns_prediction() -> None:
+@pytest.mark.anyio
+async def test_fastapi_endpoint_returns_prediction() -> None:
     # Ensure the default model is present for the API to load.
     train.main([])
-    with TestClient(app) as client:
-        response = client.post("/predict", json={"temperature": 30.0})
+
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+        response = await client.post("/predict", json={"temperature": 30.0})
+
     assert response.status_code == 200
     payload = response.json()
     assert "predicted_sales" in payload
