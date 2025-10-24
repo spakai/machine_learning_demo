@@ -41,9 +41,9 @@ jobs:
   github-models-report:
     needs: tests
     runs-on: ubuntu-latest
-    if: ${{ secrets.GITHUB_MODELS_TOKEN != '' }}
     env:
       GITHUB_MODELS_TOKEN: ${{ secrets.GITHUB_MODELS_TOKEN }}
+    if: ${{ env.GITHUB_MODELS_TOKEN != '' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
