@@ -18,9 +18,19 @@
    source .venv/bin/activate
    pip install -r requirements.txt
    ```
-2. Train the regression model (writes `models/` artifacts):
+2. Train the regression model (writes `models/` artifacts) using the updated sales data:
    ```bash
    python -m src.train
+   ```
+   Sample dataset (`data/icecream_sales.csv`):
+   ```
+   temperature,sales
+   51,1
+   65,14
+   69,20
+   72,23
+   75,26
+   81,30
    ```
 3. Launch the FastAPI server:
    ```bash
@@ -65,7 +75,18 @@
   ```bash
   pytest
   ```
-- Tests cover both the training utilities and the FastAPI endpoint (loading the on-disk model).
+- Tests cover the training utilities, API endpoint, and now validate on held-out examples.
+
+Hold-out validation data (used by tests to sanity-check the model):
+```
+temperature,sales
+52,0
+67,14
+70,23
+73,22
+78,26
+83,36
+```
 
 ## Metrics at a Glance
 - Training prints `r2` (coefficient of determination) and `rmse` (root mean square error).  
@@ -76,11 +97,18 @@
   $ python -m src.train
   Model trained and saved to .../models/icecream_regressor.joblib
   {
-    "r2": 0.9974094113729953,
-    "rmse": 0.7990469588471237
+    "r2": 0.990987388929917,
+    "rmse": 0.8972884647243659
   }
   ```
-  The sample data is so small that these metrics look nearly perfect, but you should still evaluate on held-out data for real scenarios.
+  These numbers show the linear fit matches the new training data closely. The hold-out check keeps you aware of generalization performance.
+
+## Workflow Summary
+- Retrain: `python -m src.train`
+- Evaluate locally: `pytest` (re-runs training, API smoke test, and hold-out validation)
+- Serve predictions: `uvicorn src.api:app --reload`
+- Docker path: `docker build …` then `docker run …`
+- Optional GitHub Models summary: `python scripts/github_models_report.py` once you set `GITHUB_MODELS_TOKEN`.
 
 ## Dependencies
 - `fastapi==0.110.0` – async web framework powering the prediction API.

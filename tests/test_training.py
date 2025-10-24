@@ -9,6 +9,9 @@ from src.api import app, load_artifacts
 from src.model_utils import load_dataset, load_model, save_model, train_regressor
 from src.settings import DATA_PATH, MODEL_PATH
 
+HOLDOUT_TEMPERATURES = np.array([52, 67, 70, 73, 78, 83], dtype=float).reshape(-1, 1)
+HOLDOUT_SALES = np.array([0, 14, 23, 22, 26, 36], dtype=float)
+
 
 @pytest.fixture
 def anyio_backend() -> str:
@@ -42,3 +45,14 @@ async def test_fastapi_endpoint_returns_prediction() -> None:
     payload = response.json()
     assert "predicted_sales" in payload
     assert payload["temperature"] == pytest.approx(30.0)
+
+
+def test_model_generalizes_to_holdout_examples() -> None:
+    # Train with default dataset and ensure predictions stay close on held-out points.
+    train.main([])
+    model = load_model(MODEL_PATH)
+    predictions = model.predict(HOLDOUT_TEMPERATURES)
+    mae = np.abs(predictions - HOLDOUT_SALES)
+    # Expect every holdout prediction to be within ~5 units, and average error to be small.
+    assert np.all(mae < 5.0)
+    assert mae.mean() < 3.0
