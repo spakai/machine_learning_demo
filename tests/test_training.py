@@ -26,8 +26,8 @@ def test_training_pipeline_creates_persisted_model(tmp_path: Path) -> None:
 def test_fastapi_endpoint_returns_prediction() -> None:
     # Ensure the default model is present for the API to load.
     train.main([])
-    client = TestClient(app)
-    response = client.post("/predict", json={"temperature": 30.0})
+    with TestClient(app) as client:
+        response = client.post("/predict", json={"temperature": 30.0})
     assert response.status_code == 200
     payload = response.json()
     assert "predicted_sales" in payload
