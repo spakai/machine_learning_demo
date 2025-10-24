@@ -67,6 +67,31 @@
   ```
 - Tests cover both the training utilities and the FastAPI endpoint (loading the on-disk model).
 
+## Metrics at a Glance
+- Training prints `r2` (coefficient of determination) and `rmse` (root mean square error).  
+  - `r2` ranges up to 1.0, with higher meaning the model explains more variance in the data.  
+  - `rmse` stays in sales units; lower values mean smaller average prediction errors.
+- Example run:  
+  ```bash
+  $ python -m src.train
+  Model trained and saved to .../models/icecream_regressor.joblib
+  {
+    "r2": 0.9974094113729953,
+    "rmse": 0.7990469588471237
+  }
+  ```
+  The sample data is so small that these metrics look nearly perfect, but you should still evaluate on held-out data for real scenarios.
+
+## Dependencies
+- `fastapi==0.110.0` – async web framework powering the prediction API.
+- `uvicorn[standard]==0.27.1` – ASGI server (the `[standard]` extra adds uvloop/watchgod for speed and reloads).
+- `pandas==2.2.1` – CSV/dataframe handling to load and preprocess training data.
+- `scikit-learn==1.4.1.post1` – provides the linear regression model and evaluation utilities.
+- `joblib==1.3.2` – serializes the trained scikit-learn model to disk.
+- `numpy==1.26.4` – numerical array operations underpinning pandas and scikit-learn.
+- `httpx==0.27.0` – async HTTP client used in tests and for the optional GitHub Models helper.
+- `pytest==8.1.1` – test runner that validates the training pipeline and FastAPI endpoints.
+
 ## Next Steps
 - Replace the sample CSV with your own data.
 - Extend the FastAPI schema to handle confidence intervals or batch predictions.
