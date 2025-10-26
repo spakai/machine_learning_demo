@@ -14,7 +14,7 @@ from typing import Any, Dict
 
 import httpx
 
-DEFAULT_ENDPOINT = "https://models.inference.ai.azure.com/v1/chat/completions"
+DEFAULT_ENDPOINT = "https://models.github.ai/inference/chat/completions"
 DEFAULT_MODEL = "gpt-4o-mini"
 
 
@@ -24,7 +24,10 @@ def build_prompt(metrics: Dict[str, Any], data_preview: str) -> str:
         "from ambient temperature.\n"
         f"The current metrics are: {json.dumps(metrics)}\n"
         f"A preview of the dataset rows:\n{data_preview}\n"
-        "Write a short executive summary for the README using friendly language."
+        "Highlight the top priorities for the next training iteration.\n"
+        "List three hypotheses to improve test RMSE given these numbers.\n"
+        "Respond in Markdown with two sections: '## Priorities' (bullet list) and "
+        "'## Hypotheses' (numbered list). Keep the guidance concise and actionable."
     )
 
 

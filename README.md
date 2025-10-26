@@ -97,11 +97,25 @@ The dataset and regression setup are adapted from the Microsoft Learn AI fundame
 - Generate a natural-language training report with the GitHub Models inference API:
   1. Create a fine-grained personal access token with **Models** scope.
   2. Store it as `GITHUB_MODELS_TOKEN` in your environment (locally) or repository secrets (for CI).
-  3. Run the helper script after training:
+ 3. Run the helper script after training to capture next-step guidance:
      ```bash
      python scripts/github_models_report.py
      ```
   4. On CI the `github-models-report` job will automatically run when the secret is present.
+
+### Sample Actionable Insights
+
+```
+## Priorities
+- Fold in the latest weather data refresh before retraining so the model sees this season's variance.
+- Run feature importance and permutation checks to confirm DayOfWeek/Month encodings still add lift.
+- Tighten evaluation by adding a winter-only slice to ensure hold-out RMSE stays below 6 cones.
+
+## Hypotheses
+1. Replacing the fixed 70/30 split with time-based cross-validation will reduce leakage and lower test RMSE.
+2. Engineering a humidity proxy from Rainfall plus temperature bins could capture humidity-driven demand shifts.
+3. Regularizing the regression (e.g., Ridge) may stabilize coefficients if multicollinearity is inflating variance.
+```
 
 ## Testing
 - With the virtual environment active, execute:
